@@ -1,4 +1,5 @@
 <?php
+
 class DVD{
 	protected $_id;
 	protected $_title;
@@ -8,7 +9,7 @@ class DVD{
 	
 	function __construct($id=0){
 		$this->_id = $id;
-		$db = new DB();
+		$this->_db = DB::getInstance();
 	}
 	
 	public function setTitle($title){
@@ -54,7 +55,49 @@ class DVD{
 			return 'Не срослось';
 	}
 	/* Сохранение информации об альбоме в формате XML */
-	public function getXML($id){
+//	public function getXML($id){}
+	
+	/* Записываем коллекцию треков в файл. Просто для демонстрации */
+	function __destruct(){
+		if($this->_tracks){
+			file_put_contents(__DIR__.'\tracks.log', time().'|'.serialize($this->_tracks)."\n", FILE_APPEND);
+		}
+	}
+}
+class BonusDVD extends DVD{
+
+	function __construct($id=0){
+		parent::__construct();
+		$this->_tracks[] = -1;
+	}
+}
+class DVDFactory{
+
+	public static function create($by){
+		$class = ucfirst($by) . 'DVD';
+		return new $class;
+	}
+}
+class DVDStrategy{
+	private $_strategy;
+
+	public function setStrategy($obj){
+		$this->_strategy = $obj;
+	}
+
+	public function get(){
+		return $this->_strategy->get();
+	}
+
+	public function __call($method, $args){
+		$this->_strategy->$method($args[0]);
+	}
+}
+interface DVDFormat{
+	function get();
+}
+class DVDAsXML extends DVD implements DVDFormat{
+	function get(){
 		$doc = new DomDocument('1.0', 'utf-8');
 		$doc->formatOutput = true;
 		$doc->preserveWhiteSpace = false;
@@ -64,7 +107,7 @@ class DVD{
 		$root->appendChild($band);
 		$title = $doc->createElement('title', $this->_title);
 		$root->appendChild($title);
-		
+
 		$tracks = $doc->createElement('tracks');
 		$root->appendChild($tracks);
 		$result = $this->_db->selectItemsByTitle($id);
@@ -75,12 +118,19 @@ class DVD{
 		$file_name = $this->_band.'-'.$this->_title.'.xml';
 		file_put_contents('output/'.$file_name, $doc->saveXML());
 	}
-	
-	/* Записываем коллекцию треков в файл. Просто для демонстрации */
-	function __destruct(){
-		if($this->_tracks){
-			file_put_contents(__DIR__.'\tracks.log', time().'|'.serialize($this->_tracks)."\n", FILE_APPEND);
+}
+class DVDAsJSON extends DVD implements DVDFormat{
+	function get(){
+		$doc = array();
+		$doc['dvd']['band'] = $this->_band;
+		$doc['dvd']['title'] = $this->_title;
+		$doc['dvd']['tracks'] = array();
+		$result = $this->_db->selectItemsByTitle($this->_id);
+		foreach ($result as $item){
+			$track = $doc['dvd']['tracks'][]=$item['title'];
 		}
+		$file_name = $this->_band . '-' . $this->_title . '.json';
+		file_put_contents($file_name,json_encode($doc));
 	}
 }
 ?>

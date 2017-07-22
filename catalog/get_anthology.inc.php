@@ -3,7 +3,7 @@ $catalog = new DVD();
 $band = trim(strip_tags($_GET['band']));
 $result = $catalog->showBand($band);
 if(!is_array($result)){
-	$errMsg = $result;
+	$errMsg = $result; 
 }else{
 	echo "<p>Всего треков: ".count($result)."</p>";
 ?>
