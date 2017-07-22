@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+  <table name="post">
+    <column>post_id</column>
+    <column>title</column>
+    <column>date_created</column>
+    <column>contents</column>
+    <column>rating</column>
+    <row>
+      <value>1</value>
+      <value>My First Post</value>
+      <value>2008-12-01 12:30:29</value>
+      <value>This is my first post</value>
+      <value>5</value>
+    </row>
+    <row>
+      <value>2</value>
+      <value>My Second Post</value>
+      <value>2008-12-04 15:35:25</value>
+      <value>This is my second post</value>
+      <null />
+    </row>
+    <row>
+      <value>3</value>
+      <value>My Third Post</value>
+      <value>2008-12-09 03:17:05</value>
+      <value>This is my third post</value>
+      <value>3</value>
+    </row>
+  </table>
+  <table name="post_comment">
+    <column>post_comment_id</column>
+    <column>post_id</column>
+    <column>author</column>
+    <column>content</column>
+    <column>url</column>
+    <row>
+      <value>1</value>
+      <value>2</value>
+      <value>Tom</value>
+      <value>While the topic seemed interesting the content was lacking.</value>
+      <null />
+    </row>
+    <row>
+      <value>2</value>
+      <value>2</value>
+      <value>Frank</value>
+      <value>That is because this is simply an example.</value>
+      <value>http://phpun.it</value>
+    </row>
+  </table>
+  <table name="current_visitors">
+    <column>current_visitors_id</column>
+    <column>ip</column>
+  </table>
+</dataset>
