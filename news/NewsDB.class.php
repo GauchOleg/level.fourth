@@ -16,6 +16,7 @@ class NewsDB implements INewsDB, IteratorAggregate{
 			$this->_db = new PDO('sqlite:'.self::DB_NAME);
 		}else{
 			$this->_db = new PDO('sqlite:'.self::DB_NAME);
+
 			$sql = "CREATE TABLE msgs(
 									id INTEGER PRIMARY KEY AUTOINCREMENT,
 									title TEXT,
@@ -46,21 +47,30 @@ class NewsDB implements INewsDB, IteratorAggregate{
 	function __destruct(){
 		unset($this->_db);
 	}
+
 	function saveNews($title, $category, $description, $source){
 		$dt = time();
 		$sql = "INSERT INTO msgs(title, category, description, source, datetime)
-					VALUES('$title', $category, '$description', '$source', $dt)";
-		$ret = $this->_db->exec($sql);
+					VALUES(?, ?, ?, ?, ?)";
+		$stmt = $this->_db->prepare($sql);
+		$stmt->bindParam(1,$title);
+		$stmt->bindParam(2,$category);
+		$stmt->bindParam(3,$description);
+		$stmt->bindParam(4,$source);
+		$stmt->bindParam(5,$dt);
+		$ret = $stmt->execute();
 		if(!$ret)
 			return false;
 		return true;	
-	}	
+	}
+
 	protected function db2Arr($data){
 		$arr = array();
 		while($row = $data->fetchArray(SQLITE3_ASSOC))
 			$arr[] = $row;
 		return $arr;	
 	}
+
 	public function getNews(){
 		try{
 			$sql = "SELECT msgs.id as id, title, category.name as category, description, source, datetime 
@@ -68,7 +78,7 @@ class NewsDB implements INewsDB, IteratorAggregate{
 					WHERE category.id = msgs.category
 					ORDER BY msgs.id DESC";
 			$result = $this->_db->query($sql);
-			if (!is_object($result)) 
+			if (!is_object($result))
 				throw new Exception($this->_db->lastErrorMsg());
 //			return $this->db2Arr($result);
 			$fetchfunction = function() use ($result){return $result->fetch(SQLITE3_ASSOC);};
@@ -76,7 +86,8 @@ class NewsDB implements INewsDB, IteratorAggregate{
 		}catch(Exception $e){
 			return false;
 		}
-	}	
+	}
+
 	public function deleteNews($id){
 		try{
 			$sql = "DELETE FROM msgs WHERE id = $id";
@@ -89,8 +100,9 @@ class NewsDB implements INewsDB, IteratorAggregate{
 			return false;
 		}
 	}
+
 	function clearData($data){
-		return $this->_db->escapeString($data);
+		return $this->_db->quote($data);
 	}
 }
 ?>

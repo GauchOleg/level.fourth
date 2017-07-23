@@ -1,4 +1,5 @@
 <?php
+ob_start();
 $title = $news->clearData($_POST['title']);
 $desc = $news->clearData($_POST['description']);
 $source = $news->clearData($_POST['source']);
