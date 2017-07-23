@@ -29,9 +29,11 @@ if($errMsg)
 <input type="text" name="title" /><br />
 Выберите категорию:<br />
 <select name="category">
-<option value="1">Политика</option>
-<option value="2">Культура</option>
-<option value="3">Спорт</option>
+	<?php
+		foreach ($news as $value => $name){
+			echo "<option value='<?=$value?>'>$name</option>\n";
+		}
+	?>
 </select>
 <br />
 Текст новости:<br />
@@ -42,7 +44,6 @@ if($errMsg)
 <input type="submit" value="Добавить!" />
 
 </form>
-
 <?php
 include "get_news.inc.php";
 ?>

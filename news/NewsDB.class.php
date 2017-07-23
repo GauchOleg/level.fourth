@@ -1,8 +1,23 @@
 <?php
 include "INewsDB.class.php";
-class NewsDB implements INewsDB{
+include "FetchIterator.class.php";
+class NewsDB implements INewsDB, IteratorAggregate{
+	protected $_items = [];
 	const DB_NAME = 'news.db';
 	protected $_db;
+	protected function getCategory(){
+		$sql = "SELECT id, name FROM category";
+		$result = $this->_db->query($sql);
+		while ($row = $result->fetchArray(SQLITE3_ASSOC))
+			$this->_items[$row['id']] = $row['name'];
+//		foreach ($result as $value){
+//			if ($value['id']){
+//			$this->_items[] = $value['id'];
+//		}if	($value['name']){
+//			$this->_items = $value['name'];
+//			}
+//		}return $this->_items;
+	}
 	function __construct(){
 		if(is_file(self::DB_NAME)){
 			$this->_db = new SQLite3(self::DB_NAME);
@@ -28,7 +43,13 @@ class NewsDB implements INewsDB{
 						UNION SELECT 3 as id, 'Спорт' as name";
 			$this->_db->exec($sql) or $this->_db->lastErrorMsg();	
 		}
+		$this->getCategory();
 	}
+
+	function getIterator(){
+		return new ArrayIterator($this->_items);
+	}
+
 	function __destruct(){
 		unset($this->_db);
 	}
@@ -43,7 +64,7 @@ class NewsDB implements INewsDB{
 	}	
 	protected function db2Arr($data){
 		$arr = array();
-		while($row = $data->fetchAll(SQLITE3_ASSOC))
+		while($row = $data->fetchArray(SQLITE3_ASSOC))
 			$arr[] = $row;
 		return $arr;	
 	}
@@ -56,7 +77,9 @@ class NewsDB implements INewsDB{
 			$result = $this->_db->query($sql);
 			if (!is_object($result)) 
 				throw new Exception($this->_db->lastErrorMsg());
-			return $this->db2Arr($result);
+//			return $this->db2Arr($result);
+			$fetchfunction = function() use ($result){return $result->fetchArray(SQLITE3_ASSOC);};
+			return new FetchIterator($fetchfunction);
 		}catch(Exception $e){
 			return false;
 		}

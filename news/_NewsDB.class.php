@@ -1,6 +1,7 @@
 <?php
 include "INewsDB.class.php";
-include "DB.class.php";
+include "_DB.class.php";
+
 class NewsDB implements INewsDB{
 	protected $_db;
 	function __construct(){
@@ -17,7 +18,7 @@ class NewsDB implements INewsDB{
 		if(!$ret)
 			return false;
 		return true;	
-	}	
+	}
 	protected function db2Arr($data){
 		$arr = array();
 		while($row = $this->_db->fetch($data, SQLITE3_ASSOC))
@@ -37,7 +38,7 @@ class NewsDB implements INewsDB{
 		}catch(Exception $e){
 			return false;
 		}
-	}	
+	}
 	public function deleteNews($id){
 		try{
 			$sql = "DELETE FROM msgs WHERE id = $id";

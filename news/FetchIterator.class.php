@@ -19,7 +19,8 @@ class FetchIterator implements Iterator{
 	* @param string $fetchCallback функция обратного вызова
 	*/
 	public function __construct($fetchCallback){
-		
+		$this->fetchCallback = $fetchCallback;
+		$this->count = 0;
 	}
 
 	/**
@@ -28,7 +29,8 @@ class FetchIterator implements Iterator{
 	* @return mixed Возвращает любой тип
 	*/
 	public function current(){
-		
+		$this->count || $this->next();
+		return $this->current;
 	}
 	public function rewind(){}
 	/**
@@ -37,7 +39,8 @@ class FetchIterator implements Iterator{
 	* @return scalar скалярное значение, либо целое 0
 	*/
 	public function key(){
-		
+		$this->count || $this->next();
+		return $this->count-1;
 	}
 
 	/**
@@ -47,14 +50,15 @@ class FetchIterator implements Iterator{
 	* Возвращает true или false
 	*/
 	public function valid(){
-		
+		$this->count || $this->next();
+		return $this->validate();
 	}
 
 	/**
 	* @return bool
 	*/
 	private function validate(){
-		
+		return false != $this->current || is_string($this->current);
 	}
 
 	/**
@@ -63,14 +67,19 @@ class FetchIterator implements Iterator{
 	* @return void Любое возвращаемое значение игнорируется
 	*/
 	public function next(){
-		
+		if ($this->count && ! $this->validate()){
+			return;
+		}
+		$this->fetch();
+		$this->count++;
 	}
 
 	/**
 	* Используем функцию обратного вызова
 	*/
 	public function fetch(){
-		
+		$func = $this->fetchCallback;
+		$this->current = $func();
 	}
 }
 ?>
