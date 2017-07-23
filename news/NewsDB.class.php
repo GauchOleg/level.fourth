@@ -8,21 +8,14 @@ class NewsDB implements INewsDB, IteratorAggregate{
 	protected function getCategory(){
 		$sql = "SELECT id, name FROM category";
 		$result = $this->_db->query($sql);
-		while ($row = $result->fetchArray(SQLITE3_ASSOC))
+		while ($row = $result->fetch(SQLITE3_ASSOC))
 			$this->_items[$row['id']] = $row['name'];
-//		foreach ($result as $value){
-//			if ($value['id']){
-//			$this->_items[] = $value['id'];
-//		}if	($value['name']){
-//			$this->_items = $value['name'];
-//			}
-//		}return $this->_items;
 	}
 	function __construct(){
 		if(is_file(self::DB_NAME)){
-			$this->_db = new SQLite3(self::DB_NAME);
+			$this->_db = new PDO('sqlite:'.self::DB_NAME);
 		}else{
-			$this->_db = new SQLite3(self::DB_NAME);
+			$this->_db = new PDO('sqlite:'.self::DB_NAME);
 			$sql = "CREATE TABLE msgs(
 									id INTEGER PRIMARY KEY AUTOINCREMENT,
 									title TEXT,
@@ -41,7 +34,7 @@ class NewsDB implements INewsDB, IteratorAggregate{
 						SELECT 1 as id, 'Политика' as name
 						UNION SELECT 2 as id, 'Культура' as name
 						UNION SELECT 3 as id, 'Спорт' as name";
-			$this->_db->exec($sql) or $this->_db->lastErrorMsg();	
+			$this->_db->exec($sql) or $this->_db->lastErrorMsg();
 		}
 		$this->getCategory();
 	}
@@ -78,7 +71,7 @@ class NewsDB implements INewsDB, IteratorAggregate{
 			if (!is_object($result)) 
 				throw new Exception($this->_db->lastErrorMsg());
 //			return $this->db2Arr($result);
-			$fetchfunction = function() use ($result){return $result->fetchArray(SQLITE3_ASSOC);};
+			$fetchfunction = function() use ($result){return $result->fetch(SQLITE3_ASSOC);};
 			return new FetchIterator($fetchfunction);
 		}catch(Exception $e){
 			return false;
@@ -97,7 +90,7 @@ class NewsDB implements INewsDB, IteratorAggregate{
 		}
 	}
 	function clearData($data){
-		return $this->_db->escapeString($data); 
-	}	
+		return $this->_db->escapeString($data);
+	}
 }
 ?>
